@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Vertice : MonoBehaviour {
-    public Face face;
+public class Face : MonoBehaviour {
+
+    public Vertex[] vertices;
+    public Vertex center;
 
 	// Use this for initialization
 	void Start () {
