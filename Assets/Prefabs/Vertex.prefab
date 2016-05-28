@@ -9,9 +9,9 @@ GameObject:
   m_Component:
   - 4: {fileID: 452042}
   - 33: {fileID: 3387326}
-  - 23: {fileID: 2369120}
+  - 23: {fileID: 2358434}
+  - 64: {fileID: 6427166}
   - 114: {fileID: 11480368}
-  - 65: {fileID: 6586110}
   m_Layer: 0
   m_Name: Vertex
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!23 &2369120
+--- !u!23 &2358434
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -64,8 +64,8 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 194696}
   m_Mesh: {fileID: 4300002, guid: 622a87b3379022740be7e2efea3ebd33, type: 3}
---- !u!65 &6586110
-BoxCollider:
+--- !u!64 &6427166
+MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -74,8 +74,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 4, y: 4, z: 4}
-  m_Center: {x: 0, y: 2, z: 0}
+  m_Convex: 0
+  m_Mesh: {fileID: 4300002, guid: 622a87b3379022740be7e2efea3ebd33, type: 3}
 --- !u!114 &11480368
 MonoBehaviour:
   m_ObjectHideFlags: 1
