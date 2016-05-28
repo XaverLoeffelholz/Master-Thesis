@@ -46,6 +46,7 @@ public class ObjectCreator : MonoBehaviour {
         }
 
         newObject.transform.SetParent(objects);
+        newObject.transform.localPosition = new Vector3(0, 0, 0);
 
         newObject.GetComponent<ModelingObject>().Initiate();
     }
