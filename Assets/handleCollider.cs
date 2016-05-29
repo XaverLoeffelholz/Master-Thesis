@@ -19,11 +19,17 @@ public class handleCollider : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        handle.Focus();
+        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
+        {
+            handle.Focus();
+        }
     }
 
     void OnTriggerExit(Collider other)
     {
-        handle.UnFocus();
+        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
+        {
+            handle.UnFocus();
+        }
     }
 }

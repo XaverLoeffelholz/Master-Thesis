@@ -16,53 +16,23 @@ public class meshCollisionHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (parent.focused)
-                {
-                    mousePressed = true;
-                    temps = Time.time;
-                }
-            }
-
-            if (mousePressed && parent.focused && Time.time - temps > 0.2f)
-            {
-                parent.DeSelect();
-                parent.MoveObject();
-            }
-
-            if (Input.GetMouseButtonUp(0))
-            {
-                mousePressed = false;
-
-                if (Time.time - temps <= 0.2f)
-                {
-                    if (parent.focused)
-                    {
-                        parent.Select();
-                    } else
-                    {
-                        parent.DeSelect();
-                    }
-                }
-
-                temps = 0;
-            }       
+ 
     }
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Collision Object with " + other.gameObject.name);
-
-        if (other.gameObject.CompareTag("Selector"))
+        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
         {
-            Debug.Log("Collision Object");
             parent.Focus();
-        } 
+        }
+
     }
 
     void OnTriggerExit(Collider other)
     {
-        parent.UnFocus();
+        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
+        {
+            parent.UnFocus();
+        }
     }
 }

@@ -14,8 +14,8 @@ public class ModelingObject : MonoBehaviour
     public ObjectType typeOfObject;
 
     public handles handles;
-    private UiCanvasGroup ui; 
-    public bool focused;
+    [HideInInspector]
+    public bool selected;
 
     public Vertex[] vertices;
     private Mesh mesh;
@@ -39,9 +39,7 @@ public class ModelingObject : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        focused = false;
         handles.gameObject.transform.GetChild(0).gameObject.SetActive(false);
-        ui = GameObject.Find("UI Elements").GetComponent<UiCanvasGroup>();
     }
 
     // Update is called once per frame
@@ -56,13 +54,14 @@ public class ModelingObject : MonoBehaviour
 
         mesh = this.transform.GetChild(0).GetComponent<MeshFilter>().mesh;
         meshCollider = this.transform.GetChild(0).GetComponent<MeshCollider>();
+        meshCollider.sharedMesh = initialShape;
+
         MeshCordinatesVertices = mesh.vertices;
         MeshTriangles = mesh.triangles;
         MeshUV = mesh.uv;
 
         vertices = new Vertex[MeshCordinatesVertices.Length];
 
-        // Vector3[] normals = mesh.normals;
         int i = 0;
 
         Vector3 centerTopVector = new Vector3(0, 0, 0);
@@ -199,26 +198,27 @@ public class ModelingObject : MonoBehaviour
 
     public void Focus()
     {
-        focused = true;
+        Selection.Instance.AssignCurrentFocus(transform.gameObject);
     }
 
     public void UnFocus()
     {
-        focused = false;
-
+        Selection.Instance.DeAssignCurrentFocus(transform.gameObject);
     }
 
     public void Select()
     {
-        ui.transform.position = transform.position;
-        ui.Show();
+        Selection.Instance.AssignCurrentSelection(transform.gameObject);
+        Vector3 uiPosition = transform.position;
+        uiPosition.y += 2.9f;
+        UiCanvasGroup.Instance.transform.position = uiPosition;
+        UiCanvasGroup.Instance.OpenMainMenu(this);
         handles.gameObject.transform.GetChild(0).gameObject.SetActive(true);
     }
 
     public void DeSelect()
     {
-        ui.Hide();
-        handles.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+        Selection.Instance.DeAssignCurrentSelection(transform.gameObject);
     }
 
     public void MoveObject()

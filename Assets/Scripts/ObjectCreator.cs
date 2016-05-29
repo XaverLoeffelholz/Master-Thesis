@@ -32,7 +32,7 @@ public class ObjectCreator : MonoBehaviour {
         GameObject newObject = new GameObject();
         newObject = Instantiate(modelingObject);
         newObject.transform.SetParent(objects);
-
+ 
 
         switch (type)
         {

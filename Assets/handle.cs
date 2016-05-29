@@ -7,43 +7,27 @@ public class handle : MonoBehaviour {
     {
         ScaleFace,
         PositionCenter,
-        Height
+        Height,
+        RotationX,
+        RotationY,
+        RotationZ,
     };
+
+    public GameObject connectedObject;
 
     public handleType typeOfHandle;
     public GameObject colliderHandle;
     public handles handles;
     public Face face;
-    private bool focused;
     private bool clicked;
 
 	// Use this for initialization
 	void Start () {
-        focused = false;
     }
 	
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetMouseButtonDown(0))
-        {
-            clicked = true;
-        }
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            clicked = false;
-            UnFocus();
-        }
-
-        if (focused)
-        {
-            if (clicked)
-            {
-                ApplyChanges();
-
-            }
-               
-        }
+     
     }
 
     public void ApplyChanges()
@@ -59,6 +43,15 @@ public class handle : MonoBehaviour {
             case handleType.Height:
                 ChangeHeight();
                 break;
+            case handleType.RotationX:
+                RotateX();
+                break;
+            case handleType.RotationY:
+                RotateY();
+                break;
+            case handleType.RotationZ:
+                RotateZ();
+                break;
         }
     }
 
@@ -66,7 +59,6 @@ public class handle : MonoBehaviour {
     {
         float input = Input.GetAxis("Mouse X") * 0.2f;
 
-        Debug.Log("ChangePosition2");
         Vector3 position = colliderHandle.transform.parent.localPosition;
         position.x += input;
         colliderHandle.transform.parent.localPosition = position;
@@ -89,31 +81,69 @@ public class handle : MonoBehaviour {
     {
         float input = Input.GetAxis("Mouse Y") * 0.2f;
 
-        Debug.Log("ChangePosition2");
         Vector3 position = colliderHandle.transform.parent.localPosition;
         position.y += input;
         colliderHandle.transform.parent.localPosition = position;
         face.center.coordinates = position;
     }
 
+    private void RotateX()
+    {
+        float input = Input.GetAxis("Mouse Y") * 6f;
+
+        // rotate
+        Vector3 rotation = new Vector3(0,0,0);
+
+        rotation.x += input;
+        connectedObject.transform.Rotate(rotation);
+    }
+
+    private void RotateY()
+    {
+        float input = Input.GetAxis("Mouse X") * 6f;
+
+        // rotate
+        Vector3 rotation = new Vector3(0, 0, 0);
+
+        rotation.y += input;
+        connectedObject.transform.Rotate(rotation);
+    }
+
+    private void RotateZ()
+    {
+        float input = Input.GetAxis("Mouse X") * 6f;
+
+        // rotate
+        Vector3 rotation = new Vector3(0, 0, 0);
+
+        rotation.z += input;
+        connectedObject.transform.Rotate(rotation);
+    }
+
+    public void updateHandlePosition()
+    {
+        Vector3 rotation = connectedObject.transform.localRotation.eulerAngles;
+        transform.Rotate(rotation);
+    }
+
     public void Focus()
     {
         if (!clicked && !handles.objectFocused)
         {
-            focused = true;
+            Selection.Instance.AssignCurrentFocus(transform.gameObject);
             handles.objectFocused = true;
-            LeanTween.scale(this.gameObject, new Vector3(1.0f, 1.3f, 1.3f), 0.2f);
+            //LeanTween.scale(this.gameObject, new Vector3(1.0f, 1.3f, 1.3f), 0.2f);
             LeanTween.color(this.gameObject, Color.cyan, 0.2f);
         }
     }
 
     public void UnFocus()
     {
-        if(!clicked)
+        if(!Selection.Instance.mousePressed)
         {
-            focused = false;
+            Selection.Instance.DeAssignCurrentFocus(transform.gameObject);
             handles.objectFocused = false;
-            LeanTween.scale(this.gameObject, new Vector3(1.0f, 1.0f, 1.0f), 0.2f);
+            //LeanTween.scale(this.gameObject, new Vector3(1.0f, 1.0f, 1.0f), 0.2f);
             LeanTween.color(this.gameObject, Color.white, 0.2f);
         }
     }

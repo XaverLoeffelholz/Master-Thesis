@@ -9,6 +9,9 @@ TagManager:
   - Sign
   - Handle
   - Selector
+  - UiElement
+  - Mesh
+  - ModelingObject
   layers:
   - Default
   - TransparentFX

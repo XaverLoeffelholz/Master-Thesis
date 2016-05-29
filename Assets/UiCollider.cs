@@ -19,12 +19,18 @@ public class UiCollider : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        parent.Focus();
+        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
+        {
+            parent.Focus();
+        }
     }
 
     void OnTriggerExit(Collider other)
     {
-        parent.UnFocus();
+        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
+        {
+            parent.UnFocus();
+        }
     }
 }
 
