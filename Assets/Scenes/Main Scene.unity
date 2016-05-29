@@ -203,8 +203,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f49fc01ca646004eb8dd4085fa57ba9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  triangle: {fileID: 0}
-  square: {fileID: 187808, guid: 5c2952434fc17e04fa0dad923451bce0, type: 2}
+  modelingObject: {fileID: 187808, guid: 5c2952434fc17e04fa0dad923451bce0, type: 2}
+  triangle: {fileID: 4300000, guid: 5709f242a359967488445fde5608854b, type: 3}
+  square: {fileID: 4300000, guid: fa89ce12198a2c848bc70bf44ad8327e, type: 3}
   hexagon: {fileID: 0}
   octagon: {fileID: 0}
   objects: {fileID: 363519786}
@@ -1182,7 +1183,6 @@ Canvas:
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0

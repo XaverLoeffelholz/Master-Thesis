@@ -3,6 +3,16 @@ using System.Collections;
 
 public class ModelingObject : MonoBehaviour
 {
+    public enum ObjectType
+    {
+        triangle = 0,
+        square = 1,
+        hexagon = 2,
+        octagon = 3
+    }
+
+    public ObjectType typeOfObject;
+
     public handles handles;
     private UiCanvasGroup ui; 
     public bool focused;
@@ -24,13 +34,7 @@ public class ModelingObject : MonoBehaviour
     public GameObject VertexPrefab;
     public GameObject VertexBundlePrefab;
 
-    public enum ObjectType
-    {
-        triangle = 0,
-        square = 1,
-        hexagon = 2,
-        octagon = 3
-    }
+ 
 
     // Use this for initialization
     void Start()
@@ -46,8 +50,10 @@ public class ModelingObject : MonoBehaviour
 
     }
 
-    public void Initiate()
+    public void Initiate(Mesh initialShape)
     {
+        this.transform.GetChild(0).GetComponent<MeshFilter>().mesh = initialShape;
+
         mesh = this.transform.GetChild(0).GetComponent<MeshFilter>().mesh;
         meshCollider = this.transform.GetChild(0).GetComponent<MeshCollider>();
         MeshCordinatesVertices = mesh.vertices;

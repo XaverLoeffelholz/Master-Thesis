@@ -3,10 +3,11 @@ using System.Collections;
 
 public class ObjectCreator : MonoBehaviour {
 
-    public GameObject triangle;
-    public GameObject square;
-    public GameObject hexagon;
-    public GameObject octagon;
+    public GameObject modelingObject;
+    public Mesh triangle;
+    public Mesh square;
+    public Mesh hexagon;
+    public Mesh octagon;
 
     public Transform objects;
 
@@ -19,36 +20,41 @@ public class ObjectCreator : MonoBehaviour {
 	void Update () {
         if (Input.GetKeyDown(KeyCode.F))
         {
+            createNewObject(ModelingObject.ObjectType.triangle);
             createNewObject(ModelingObject.ObjectType.square);
         }
 
+  
     }
 
     public void createNewObject(ModelingObject.ObjectType type)
     {
         GameObject newObject = new GameObject();
+        newObject = Instantiate(modelingObject);
+        newObject.transform.SetParent(objects);
+
 
         switch (type)
         {
             case ModelingObject.ObjectType.triangle:
-                newObject = Instantiate(triangle);
+                newObject.GetComponent<ModelingObject>().Initiate(triangle);
+                newObject.transform.localPosition = new Vector3(-2, 0, 0);
                 break;
             case ModelingObject.ObjectType.square:
-                newObject = Instantiate(square);
+                newObject.GetComponent<ModelingObject>().Initiate(square);
+                newObject.transform.localPosition = new Vector3(2, 0, 0);
                 break;
             case ModelingObject.ObjectType.hexagon:
-                newObject = Instantiate(hexagon);
+                newObject.GetComponent<ModelingObject>().Initiate(hexagon);
                 break;
             case ModelingObject.ObjectType.octagon:
-                newObject = Instantiate(octagon);
+                newObject.GetComponent<ModelingObject>().Initiate(octagon);
                 break;
-
         }
 
-        newObject.transform.SetParent(objects);
-        newObject.transform.localPosition = new Vector3(0, 0, 0);
 
-        newObject.GetComponent<ModelingObject>().Initiate();
+
+
     }
 
 }

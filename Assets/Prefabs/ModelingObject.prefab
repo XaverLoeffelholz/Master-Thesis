@@ -954,6 +954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d55fcd0dfa1925b428d7c7cb8e38cd12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  typeOfObject: 1
   handles: {fileID: 11435648}
   focused: 0
   vertices: []
