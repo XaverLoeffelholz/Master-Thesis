@@ -27,7 +27,7 @@ public class Selection : Singleton<Selection>{
             if (mousePressed && currentFocus.CompareTag("ModelingObject") && Time.time - temps > 0.2f)
             {
                 currentFocus.GetComponent<ModelingObject>().MoveObject();
-                UiCanvasGroup.Instance.Show();
+                UiCanvasGroup.Instance.Hide();
             }
             else if (mousePressed && currentFocus.CompareTag("Handle"))
             {
