@@ -5,10 +5,10 @@ public class ModelingObject : MonoBehaviour
 {
     public enum ObjectType
     {
-        triangle = 0,
-        square = 1,
-        hexagon = 2,
-        octagon = 3
+        triangle = 3,
+        square = 4,
+        hexagon = 6,
+        octagon = 8
     }
 
     public ObjectType typeOfObject;
@@ -17,13 +17,14 @@ public class ModelingObject : MonoBehaviour
     [HideInInspector]
     public bool selected;
 
-    public Vertex[] vertices;
     private Mesh mesh;
     private MeshCollider meshCollider;
     private Vector3[] MeshCordinatesVertices;
     private Vector2[] MeshUV;
     private int[] MeshTriangles;
 
+	public Vertex[] vertices;
+	public Face[] faces;
     public GameObject[] vertexBundles;
     public Face topFace;
     public Face bottomFace;
@@ -33,6 +34,10 @@ public class ModelingObject : MonoBehaviour
 
     public GameObject VertexPrefab;
     public GameObject VertexBundlePrefab;
+
+	public GameObject NormalPrefab;
+	public GameObject Vertex2Prefab;
+	public GameObject FacePrefab;
 
  
 
@@ -58,46 +63,70 @@ public class ModelingObject : MonoBehaviour
 
         MeshCordinatesVertices = mesh.vertices;
         MeshTriangles = mesh.triangles;
+		mesh.RecalculateNormals ();
+
+		Debug.Log ("Number of Triangles: " + mesh.triangles.Length);
+		Debug.Log ("NUmber of Normals: " + mesh.normals.Length);
+		Debug.Log ("NUmber of vertices: " + mesh.vertices.Length);
+
+
+		int normalCount = 0;
+		int vertexCount = 0;
+
         MeshUV = mesh.uv;
 
-        vertices = new Vertex[MeshCordinatesVertices.Length];
+		vertices = new Vertex[MeshCordinatesVertices.Length];
 
-        int i = 0;
+		int i = 0;
+
+		switch (typeOfObject) {
+		case ObjectType.triangle:
+			topFace.InitializeFace (3);
+			bottomFace.InitializeFace (3);
+			break;
+		case ObjectType.square:
+			topFace.InitializeFace (4);
+			bottomFace.InitializeFace (4);
+			break;
+		case ObjectType.octagon:
+			topFace.InitializeFace (6);
+			bottomFace.InitializeFace (6);
+			break;
+		case ObjectType.hexagon:
+			topFace.InitializeFace (8);
+			bottomFace.InitializeFace (8);
+			break;
+		}
 
         Vector3 centerTopVector = new Vector3(0, 0, 0);
         Vector3 centerBottomVector = new Vector3(0, 0, 0);
 
-        while (i < MeshCordinatesVertices.Length)
+		while (i < MeshCordinatesVertices.Length)
         {
             GameObject vert = Instantiate(VertexPrefab);
 
             if (MeshCordinatesVertices[i].y > 0.0f)
             {
                 vert.transform.SetParent(topFace.gameObject.transform);
-                centerTopVector.x += MeshCordinatesVertices[i].x;
-                centerTopVector.y += MeshCordinatesVertices[i].y;
-                centerTopVector.z += MeshCordinatesVertices[i].z;
+				centerTopVector += MeshCordinatesVertices[i];
             }
             else
             {
                 vert.transform.SetParent(bottomFace.gameObject.transform);
-                centerBottomVector.x += MeshCordinatesVertices[i].x;
-                centerBottomVector.y += MeshCordinatesVertices[i].y;
-                centerBottomVector.z += MeshCordinatesVertices[i].z;
+                centerBottomVector += MeshCordinatesVertices[i];
             }
 
             vert.transform.localPosition = MeshCordinatesVertices[i];
             vertices[i] = vert.GetComponent<Vertex>();
+
+			// the normals in the mesh have the same Ids as the vertices, so we can safe a normal for every vertex
+			vertices [i].normal = mesh.normals [i];
+
             i++;
         }
 
-        centerBottomVector.x = centerBottomVector.x / (MeshCordinatesVertices.Length / 2.0f);
-        centerBottomVector.y = centerBottomVector.y / (MeshCordinatesVertices.Length / 2.0f);
-        centerBottomVector.z = centerBottomVector.z / (MeshCordinatesVertices.Length / 2.0f);
-
-        centerTopVector.x = centerTopVector.x / (MeshCordinatesVertices.Length / 2.0f);
-        centerTopVector.y = centerTopVector.y / (MeshCordinatesVertices.Length / 2.0f);
-        centerTopVector.z = centerTopVector.z / (MeshCordinatesVertices.Length / 2.0f);
+        centerBottomVector = centerBottomVector / (MeshCordinatesVertices.Length / 2.0f);
+        centerTopVector = centerTopVector / (MeshCordinatesVertices.Length / 2.0f);
 
         GameObject centerBottomPrefab = Instantiate(VertexPrefab);
         GameObject centerTopPrefab = Instantiate(VertexPrefab);
@@ -116,22 +145,95 @@ public class ModelingObject : MonoBehaviour
 
         mesh.vertices = MeshCordinatesVertices;
 
-        bundleSimilarVertices(topFace.gameObject.transform);
-        bundleSimilarVertices(bottomFace.gameObject.transform);
+        BundleSimilarVertices(topFace.gameObject.transform);
+        BundleSimilarVertices(bottomFace.gameObject.transform);
 
         topFace.center = centerTop.transform.parent.GetComponent<VertexBundle>();
         bottomFace.center = centerBottom.transform.parent.GetComponent<VertexBundle>();
 
-        topFace.vertexBundles = topFace.GetComponentsInChildren<VertexBundle>();
         topFace.centerPosition = topFace.center.coordinates;
-        bottomFace.vertexBundles = bottomFace.GetComponentsInChildren<VertexBundle>();
         bottomFace.centerPosition = bottomFace.center.coordinates;
 
+
+
+		// always group 4 vertexbundles to new faces
+
+		/*
+
+		while(vertexCount<mesh.triangles.Length && normalCount < mesh.normals.Length) {
+			// go through all triangles (for example 12 in cube)
+
+			// check the normal, if there is already a triangle with this normal, don't do anything
+
+			// otherwise create new normal and take the normal of this triangle as the normal of this face
+
+			// compare it to the normals of other triangles, if similar ad its vertices to a face
+
+			// calculate center when we have all vertices
+
+			// when we have all faces we need to check for top and bottom face
+
+			// if newly created one, just by y-value
+
+			// if it is created on top of another, put the duplicated one in the bottom group and the others in the top group
+
+
+
+			Vector3 point1 = MeshCordinatesVertices[mesh.triangles [vertexCount]];
+			Vector3 point2 = MeshCordinatesVertices[mesh.triangles [vertexCount+1]];
+			Vector3 point3 = MeshCordinatesVertices[mesh.triangles [vertexCount+2]];
+
+			Vector3 center = (point1 + point2 + point3) / 3;
+
+			GameObject normal = Instantiate (NormalPrefab);
+			normal.transform.SetParent (transform.GetChild(0));
+			normal.transform.position = transform.position + mesh.normals[normalCount]*1.2f;
+
+			GameObject normal2 = Instantiate (NormalPrefab);
+			normal2.transform.SetParent (transform.GetChild(0));
+			normal2.transform.position = transform.position + mesh.normals[normalCount]*1.8f;
+
+			GameObject p1 = Instantiate (Vertex2Prefab);
+			p1.transform.SetParent (transform.GetChild(0));
+			p1.transform.position = point1  + mesh.normals[normalCount]*0.08f;
+
+			GameObject p2 = Instantiate (Vertex2Prefab);
+			p2.transform.SetParent (transform.GetChild(0));
+			p2.transform.position = point2 + mesh.normals[normalCount]*0.08f;
+
+			GameObject p3 = Instantiate (Vertex2Prefab);
+			p3.transform.SetParent (transform.GetChild(0));
+			p3.transform.position = point3 + mesh.normals[normalCount]*0.08f;
+
+
+
+			Color randomColor = new Color (Random.value, Random.value, Random.value, 1f);
+			normal.GetComponent<Renderer> ().material.color = randomColor;
+			normal2.GetComponent<Renderer> ().material.color = randomColor;
+
+
+			p1.GetComponent<Renderer> ().material.color = randomColor;
+			p2.GetComponent<Renderer> ().material.color = randomColor;
+			p3.GetComponent<Renderer> ().material.color = randomColor;
+
+			normalCount += 2;
+			vertexCount += 3;
+		}
+
+		*/
+
         InitiateHandles();
+		ShowNormals();
+		GetFacesBasedOnNormals ();
     }
 
+	public void ShowNormals(){
+		for (int i = 0; i < vertices.Length; i++) {
+			vertices [i].ShowNormal ();
+		}
+	}
 
-    public void bundleSimilarVertices(Transform face)
+    public void BundleSimilarVertices(Transform face)
     {
 
         Transform[] allChildren = face.GetComponentsInChildren<Transform>();
@@ -154,7 +256,7 @@ public class ModelingObject : MonoBehaviour
                 }
 
             // if no similar found, create new vertex bundle
-            if (!allChildren[i].parent.gameObject.CompareTag("VertexBundle"))
+			if (!allChildren[i].parent.gameObject.CompareTag("VertexBundle"))
             {
                 GameObject vertexBundle = Instantiate(VertexBundlePrefab);
                 vertexBundle.transform.SetParent(face);
@@ -164,11 +266,12 @@ public class ModelingObject : MonoBehaviour
 
                 allChildren[i].SetParent(vertexBundle.transform);
 
-                if (vertexBundle.transform.childCount == 0)
-                {
-                    Destroy(vertexBundle);
-                }
-            }
+				if (vertexBundle.transform.childCount == 0) {
+					Destroy (vertexBundle);
+				} else {
+					face.GetComponent<Face> ().AddVertexBundle (vertexBundle.GetComponent<VertexBundle>());
+				}
+	         }
         }
     }
 
@@ -231,6 +334,60 @@ public class ModelingObject : MonoBehaviour
         position.y += inputY;
         transform.localPosition = position;
     }
+
+	public void GetFacesBasedOnNormals(){
+		int arrayLength = 0;
+
+		switch (typeOfObject) {
+			case ObjectType.triangle:
+				arrayLength = 5;
+				break;
+			case ObjectType.square:
+				arrayLength = 6;
+				break;
+			case ObjectType.octagon:
+				arrayLength = 8;
+				break;
+			case ObjectType.hexagon:
+				arrayLength = 10;
+				break;
+		}
+
+		faces = new Face[arrayLength];
+
+		int faceCount = 0;
+		Face faceFound;
+
+		// go trough all vertices
+		for (int i = 0; i < vertices.Length; i++) {
+			faceFound = null;
+
+			// check for each vertex every face and 
+			for (int j = 0; j < faces.Length; j++) {
+				
+				if (faces [j] != null && vertices [i].normal == faces [j].normal) {
+					faceFound = faces [j];
+				} 
+
+			}
+
+			if (faceFound != null) {
+				Debug.Log ("add vertex bundle with vertex at " + vertices[i].transform.localPosition);
+				faceFound.AddVertexBundle (vertices [i].transform.GetComponentInParent<VertexBundle>());
+			} else {
+				Debug.Log ("Create new face");
+				GameObject newFace = Instantiate (FacePrefab);
+				newFace.transform.SetParent (transform.GetChild(0));
+				faces [faceCount] = newFace.GetComponent<Face> ();
+				faces [faceCount].InitializeFace (4);
+				faces [faceCount].normal = vertices [i].normal;
+
+				faces [faceCount].AddVertexBundle (vertices [i].transform.GetComponentInParent<VertexBundle>());
+				Debug.Log ("add vertex bundle with vertex at " + vertices[i].transform.localPosition);
+				faceCount++;
+			}
+		}
+	}
 
 
 }

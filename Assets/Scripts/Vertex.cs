@@ -5,7 +5,9 @@ public class Vertex : MonoBehaviour {
 
     private VertexBundle parentVertexBundle;
     private ModelingObject parentObject;
+	public Vector3 normal;
     public bool moving;
+	public GameObject normalPrefab;
 
 	// Use this for initialization
 	void Start () {
@@ -40,4 +42,13 @@ public class Vertex : MonoBehaviour {
     {
         parentVertexBundle.coordinates = this.transform.localPosition;
     }
+
+	public void ShowNormal(){
+		if (normal != null) {
+			GameObject normalVisualisation = Instantiate (normalPrefab);
+			normalVisualisation.transform.SetParent (this.transform);
+			normalVisualisation.transform.localPosition = transform.localPosition + normal*1.3f;
+		}
+
+	}
 }

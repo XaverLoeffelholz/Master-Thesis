@@ -32,12 +32,12 @@ public class ObjectCreator : MonoBehaviour {
         GameObject newObject = new GameObject();
         newObject = Instantiate(modelingObject);
         newObject.transform.SetParent(objects);
- 
+		newObject.GetComponent<ModelingObject> ().typeOfObject = type;
 
         switch (type)
         {
-            case ModelingObject.ObjectType.triangle:
-                newObject.GetComponent<ModelingObject>().Initiate(triangle);
+		case ModelingObject.ObjectType.triangle:
+				newObject.GetComponent<ModelingObject> ().Initiate (triangle);
                 newObject.transform.localPosition = new Vector3(-2, 0, 0);
                 break;
             case ModelingObject.ObjectType.square:

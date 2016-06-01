@@ -6,13 +6,14 @@ public class Face : MonoBehaviour {
     public VertexBundle[] vertexBundles;
     public VertexBundle center;
     public Vector3 centerPosition;
+	public Vector3 normal;
     public handle scaleHandle;
     public handle centerHandle;
     public handle heightHandle;
 
     // Use this for initialization
     void Start () {
-
+		
     }
 	
 	// Update is called once per frame
@@ -21,6 +22,10 @@ public class Face : MonoBehaviour {
         {
             UpdateFaceFromCenter();
         }
+	}
+
+	public void InitializeFace(int numberOfVertices) {
+		vertexBundles = new VertexBundle[numberOfVertices];
 	}
 
     public void scaleFace(float amount)
@@ -59,6 +64,16 @@ public class Face : MonoBehaviour {
         }
 
     }
+
+	public void AddVertexBundle(VertexBundle vBundle){
+		for (int i=0; i< vertexBundles.Length; i++){
+			if (vertexBundles [i] == null) {
+				vertexBundles [i] = vBundle;
+				break;
+			}
+		}
+
+	}
 
 
 }

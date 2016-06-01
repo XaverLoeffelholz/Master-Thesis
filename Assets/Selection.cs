@@ -7,6 +7,7 @@ public class Selection : Singleton<Selection>{
     public GameObject currentSelection;
     public bool mousePressed;
     private float temps;
+	private bool faceSelection;
 
     // Use this for initialization
     void Start () {
@@ -43,8 +44,13 @@ public class Selection : Singleton<Selection>{
             {
                 if (currentFocus.CompareTag("ModelingObject") && Time.time - temps <= 0.2f)
                 {
-                    UiCanvasGroup.Instance.Show();
-                    currentFocus.GetComponent<ModelingObject>().Select();
+					if (!faceSelection) {
+						UiCanvasGroup.Instance.Show ();
+						currentFocus.GetComponent<ModelingObject> ().Select ();
+					} else {
+
+					}
+
 
                 } else if (currentFocus.CompareTag("Handle"))
                 {
@@ -54,7 +60,7 @@ public class Selection : Singleton<Selection>{
                 } else if (currentFocus.CompareTag("UiElement"))
                 {
                     currentFocus.GetComponent<UiElement>().goal.ActivateMenu();
-                }
+				} 
 
             } else
             {
@@ -96,6 +102,10 @@ public class Selection : Singleton<Selection>{
             currentSelection = null;
         }
     }
+
+	public void enableFaceSelection(bool value){
+		faceSelection = value;	
+	}
 
 
 }
