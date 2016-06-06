@@ -47,6 +47,8 @@ MonoBehaviour:
   scaleHandle: {fileID: 0}
   centerHandle: {fileID: 0}
   heightHandle: {fileID: 0}
+  VertexBundlePrefab: {fileID: 140742, guid: c20e95700ac9f664ebdee04cce835b2c, type: 2}
+  VertexPrefab: {fileID: 194696, guid: 71f546c095f3bf84ab595b592daf35aa, type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

@@ -29,8 +29,6 @@ public class ModelingObject : MonoBehaviour
     public Face topFace;
     public Face bottomFace;
     public Color color;
-    public Vertex centerTop;
-    public Vertex centerBottom;
 
     public GameObject VertexPrefab;
     public GameObject VertexBundlePrefab;
@@ -39,7 +37,7 @@ public class ModelingObject : MonoBehaviour
 	public GameObject Vertex2Prefab;
 	public GameObject FacePrefab;
 
- 
+	bool focused = false;
 
     // Use this for initialization
     void Start()
@@ -65,11 +63,6 @@ public class ModelingObject : MonoBehaviour
         MeshTriangles = mesh.triangles;
 		mesh.RecalculateNormals ();
 
-		Debug.Log ("Number of Triangles: " + mesh.triangles.Length);
-		Debug.Log ("NUmber of Normals: " + mesh.normals.Length);
-		Debug.Log ("NUmber of vertices: " + mesh.vertices.Length);
-
-
 		int normalCount = 0;
 		int vertexCount = 0;
 
@@ -77,84 +70,44 @@ public class ModelingObject : MonoBehaviour
 
 		vertices = new Vertex[MeshCordinatesVertices.Length];
 
-		int i = 0;
 
-		switch (typeOfObject) {
-		case ObjectType.triangle:
-			topFace.InitializeFace (3);
-			bottomFace.InitializeFace (3);
-			break;
-		case ObjectType.square:
-			topFace.InitializeFace (4);
-			bottomFace.InitializeFace (4);
-			break;
-		case ObjectType.octagon:
-			topFace.InitializeFace (6);
-			bottomFace.InitializeFace (6);
-			break;
-		case ObjectType.hexagon:
-			topFace.InitializeFace (8);
-			bottomFace.InitializeFace (8);
-			break;
-		}
-
-        Vector3 centerTopVector = new Vector3(0, 0, 0);
-        Vector3 centerBottomVector = new Vector3(0, 0, 0);
-
-		while (i < MeshCordinatesVertices.Length)
+		for (int i=0; i < MeshCordinatesVertices.Length; i++)
         {
             GameObject vert = Instantiate(VertexPrefab);
-
-            if (MeshCordinatesVertices[i].y > 0.0f)
-            {
-                vert.transform.SetParent(topFace.gameObject.transform);
-				centerTopVector += MeshCordinatesVertices[i];
-            }
-            else
-            {
-                vert.transform.SetParent(bottomFace.gameObject.transform);
-                centerBottomVector += MeshCordinatesVertices[i];
-            }
 
             vert.transform.localPosition = MeshCordinatesVertices[i];
             vertices[i] = vert.GetComponent<Vertex>();
 
 			// the normals in the mesh have the same Ids as the vertices, so we can safe a normal for every vertex
 			vertices [i].normal = mesh.normals [i];
-
-            i++;
         }
 
-        centerBottomVector = centerBottomVector / (MeshCordinatesVertices.Length / 2.0f);
-        centerTopVector = centerTopVector / (MeshCordinatesVertices.Length / 2.0f);
+		GetFacesBasedOnNormals ();
 
-        GameObject centerBottomPrefab = Instantiate(VertexPrefab);
-        GameObject centerTopPrefab = Instantiate(VertexPrefab);
+		for (int i=0; i < MeshCordinatesVertices.Length; i++)
+		{
+			if (MeshCordinatesVertices [i].y > 0.0f) {
+				vertices[i].transform.SetParent (topFace.gameObject.transform);
+			} else {
+				vertices[i].transform.SetParent (bottomFace.gameObject.transform);
+			}
 
-        centerBottomPrefab.name = "Center Bottom";
-        centerTopPrefab.name = "Center Top";
+			vertices [i].Initialize ();
+		}
 
-        centerBottomPrefab.transform.SetParent(bottomFace.gameObject.transform);
-        centerTopPrefab.transform.SetParent(topFace.gameObject.transform);
-
-        centerBottomPrefab.transform.localPosition = centerBottomVector;
-        centerTopPrefab.transform.localPosition = centerTopVector;
-
-        centerTop = centerTopPrefab.GetComponent<Vertex>();
-        centerBottom = centerBottomPrefab.GetComponent<Vertex>();
-
-        mesh.vertices = MeshCordinatesVertices;
+		mesh.vertices = MeshCordinatesVertices;
 
         BundleSimilarVertices(topFace.gameObject.transform);
         BundleSimilarVertices(bottomFace.gameObject.transform);
 
-        topFace.center = centerTop.transform.parent.GetComponent<VertexBundle>();
-        bottomFace.center = centerBottom.transform.parent.GetComponent<VertexBundle>();
+		AssignVertexBundlesToFaces ();
 
-        topFace.centerPosition = topFace.center.coordinates;
-        bottomFace.centerPosition = bottomFace.center.coordinates;
-
-
+		for (int j = 0; j < faces.Length; j++) {
+			faces[j].CalculateCenter();
+		}
+			
+		InitiateHandles();
+		InitializeVertices ();
 
 		// always group 4 vertexbundles to new faces
 
@@ -172,7 +125,7 @@ public class ModelingObject : MonoBehaviour
 			// calculate center when we have all vertices
 
 			// when we have all faces we need to check for top and bottom face
-
+GetFaceFromCollisionCoordinate
 			// if newly created one, just by y-value
 
 			// if it is created on top of another, put the duplicated one in the bottom group and the others in the top group
@@ -222,14 +175,17 @@ public class ModelingObject : MonoBehaviour
 
 		*/
 
-        InitiateHandles();
-		ShowNormals();
-		GetFacesBasedOnNormals ();
     }
 
-	public void ShowNormals(){
+	public void InitializeVertices () {
 		for (int i = 0; i < vertices.Length; i++) {
-			vertices [i].ShowNormal ();
+			vertices [i].Initialize ();
+		}
+	}
+
+	public void ShowNormals(){
+		for (int i = 0; i < faces.Length; i++) {
+			Debug.DrawLine(faces[i].center.transform.position, faces[i].center.transform.position + faces[i].normal*3.0f, Color.red, 500f);
 		}
 	}
 
@@ -297,16 +253,39 @@ public class ModelingObject : MonoBehaviour
         handles.CenterTopPosition.transform.localPosition = topFace.centerPosition;
         handles.CenterBottomPosition.transform.localPosition = bottomFace.centerPosition;
         handles.Height.transform.localPosition = topFace.centerPosition;
+
+		handles.faceTopScale.GetComponent<handle> ().face = topFace;
+		handles.faceBottomScale.GetComponent<handle> ().face = bottomFace;
+
+		handles.CenterTopPosition.GetComponent<handle> ().face = topFace;
+		handles.CenterBottomPosition.GetComponent<handle> ().face = bottomFace;
+
+		handles.Height.GetComponent<handle> ().face = topFace;
+
+		topFace.centerHandle = handles.CenterTopPosition.GetComponent<handle> ();
+		topFace.heightHandle = handles.Height.GetComponent<handle> ();
+		topFace.scaleHandle = handles.faceTopScale.GetComponent<handle> ();
+
+		bottomFace.centerHandle = handles.CenterBottomPosition.GetComponent<handle> ();
+		//bottomFace.heightHandle = handles.Height.GetComponent<handle> ();
+		bottomFace.scaleHandle = handles.faceBottomScale.GetComponent<handle> ();
+
     }
 
     public void Focus()
     {
-        Selection.Instance.AssignCurrentFocus(transform.gameObject);
+		if (!focused) {
+			Selection.Instance.AssignCurrentFocus(transform.gameObject);
+			focused = true;
+		}
     }
 
     public void UnFocus()
     {
-        Selection.Instance.DeAssignCurrentFocus(transform.gameObject);
+		if (focused) {
+			Selection.Instance.DeAssignCurrentFocus(transform.gameObject);
+			focused = false;
+		}
     }
 
     public void Select()
@@ -335,7 +314,29 @@ public class ModelingObject : MonoBehaviour
         transform.localPosition = position;
     }
 
+
+	public void AssignVertexBundlesToFaces(){
+		
+		// go through all vertices
+		for (int i = 0; i < vertices.Length; i++) {
+
+			// check normal of vertice and compare with normal of face
+			for (int j = 0; j < faces.Length; j++) {
+
+				// if normals are similar, linke parent vertex bundle to face
+				if (vertices [i].normal == faces [j].normal) {
+					faces [j].AddVertexBundle (vertices [i].transform.GetComponentInParent<VertexBundle> ());
+				} 
+
+			}
+		}
+	}
+
+
 	public void GetFacesBasedOnNormals(){
+
+		//currently we have top and bottom face 2 times
+
 		int arrayLength = 0;
 
 		switch (typeOfObject) {
@@ -371,23 +372,71 @@ public class ModelingObject : MonoBehaviour
 
 			}
 
-			if (faceFound != null) {
-				Debug.Log ("add vertex bundle with vertex at " + vertices[i].transform.localPosition);
-				faceFound.AddVertexBundle (vertices [i].transform.GetComponentInParent<VertexBundle>());
-			} else {
-				Debug.Log ("Create new face");
+			if (faceFound == null) {
 				GameObject newFace = Instantiate (FacePrefab);
 				newFace.transform.SetParent (transform.GetChild(0));
 				faces [faceCount] = newFace.GetComponent<Face> ();
-				faces [faceCount].InitializeFace (4);
+
+				// Check if it is top face? Or not create new face if it is the top/bottom face
+				if (vertices [i].normal.x == 0 && vertices [i].normal.z == 0) {
+
+					switch (typeOfObject) {
+					case ObjectType.triangle:
+						faces [faceCount].InitializeFace (3);
+						break;
+					case ObjectType.square:
+						faces [faceCount].InitializeFace (4);
+						break;
+					case ObjectType.octagon:
+						faces [faceCount].InitializeFace (6);
+						break;
+					case ObjectType.hexagon:
+						faces [faceCount].InitializeFace (8);
+						break;
+					}
+						
+					//if direction is up, it is the top face (number of vertices depends on type)
+					if (vertices [i].normal.y > 0) {
+						faces [faceCount].SetType (Face.faceType.TopFace);
+						topFace = newFace.GetComponent<Face>();
+
+					//if direction is down, it is the bottom face (number of vertices depends on type)
+					} else {
+						faces [faceCount].SetType (Face.faceType.BottomFace);
+						bottomFace = newFace.GetComponent<Face>();
+					}
+
+				// others are side faces (4 vertices)
+				}  else {
+					faces [faceCount].InitializeFace (4);
+					faces [faceCount].SetType (Face.faceType.SideFace);
+				}
+
 				faces [faceCount].normal = vertices [i].normal;
 
-				faces [faceCount].AddVertexBundle (vertices [i].transform.GetComponentInParent<VertexBundle>());
-				Debug.Log ("add vertex bundle with vertex at " + vertices[i].transform.localPosition);
 				faceCount++;
 			}
 		}
 	}
 
 
+	public Face GetFaceFromCollisionCoordinate(Vector3 pointOfCollision) {
+
+		// use dot product to check if point lies on a face
+
+		for (int i = 0; i < faces.Length; i++) {
+
+			Debug.Log ("Collision Point " + pointOfCollision);
+			Debug.Log ("Other Point " + faces[i].vertexBundles[0].transform.GetChild(0).position);
+
+			Debug.Log("Dot product: " + (Vector3.Dot((faces[i].vertexBundles[0].transform.GetChild(0).position - pointOfCollision), faces[i].normal)));
+
+			if (Mathf.Abs(Vector3.Dot((faces[i].vertexBundles[0].transform.GetChild(0).position - pointOfCollision), faces[i].normal)) <= 0.1){
+				return faces [i];
+			}
+		}
+
+		return null;
+	}
+		
 }

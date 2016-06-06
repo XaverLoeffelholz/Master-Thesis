@@ -4,6 +4,7 @@ using System.Collections;
 public class meshCollisionHandler : MonoBehaviour
 {
     public ModelingObject parent;
+
     private bool mousePressed;
     private float temps;
 
@@ -19,20 +20,4 @@ public class meshCollisionHandler : MonoBehaviour
  
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
-        {
-            parent.Focus();
-        }
-
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.CompareTag("Selector") && !Selection.Instance.mousePressed)
-        {
-            parent.UnFocus();
-        }
-    }
 }

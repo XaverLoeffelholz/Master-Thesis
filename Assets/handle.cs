@@ -20,6 +20,7 @@ public class handle : MonoBehaviour {
     public handles handles;
     public Face face;
     private bool clicked;
+	public bool focused = false;
 
 	// Use this for initialization
 	void Start () {
@@ -128,23 +129,30 @@ public class handle : MonoBehaviour {
 
     public void Focus()
     {
-        if (!clicked && !handles.objectFocused)
-        {
-            Selection.Instance.AssignCurrentFocus(transform.gameObject);
-            handles.objectFocused = true;
-            //LeanTween.scale(this.gameObject, new Vector3(1.0f, 1.3f, 1.3f), 0.2f);
-            LeanTween.color(this.gameObject, Color.cyan, 0.2f);
-        }
+		if (!focused) {
+			if (!clicked && !handles.objectFocused)	{
+				
+				Selection.Instance.AssignCurrentFocus(transform.gameObject);
+				handles.objectFocused = true;
+
+				LeanTween.color(this.gameObject, Color.cyan, 0.2f);
+				focused = true;
+			}
+		}
+
     }
 
     public void UnFocus()
     {
-        if(!Selection.Instance.mousePressed)
-        {
-            Selection.Instance.DeAssignCurrentFocus(transform.gameObject);
-            handles.objectFocused = false;
-            //LeanTween.scale(this.gameObject, new Vector3(1.0f, 1.0f, 1.0f), 0.2f);
-            LeanTween.color(this.gameObject, Color.white, 0.2f);
-        }
+		if (focused) {
+			if(!Selection.Instance.mousePressed)
+			{
+				Selection.Instance.DeAssignCurrentFocus(transform.gameObject);
+				handles.objectFocused = false;
+				//LeanTween.scale(this.gameObject, new Vector3(1.0f, 1.0f, 1.0f), 0.2f);
+				LeanTween.color(this.gameObject, Color.white, 0.2f);
+				focused = false;
+			}
+		}
     }
 }

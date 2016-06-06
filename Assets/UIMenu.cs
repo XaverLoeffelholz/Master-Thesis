@@ -75,8 +75,9 @@ public class UIMenu : MonoBehaviour {
             case (menuType.Object):
                 transform.parent.GetComponent<UiCanvasGroup>().currentModelingObject.handles.DisableHandles();
                 break;
-            case (menuType.NewObject):
-                transform.parent.GetComponent<UiCanvasGroup>().currentModelingObject.handles.DisableHandles();
+		case (menuType.NewObject):
+				transform.parent.GetComponent<UiCanvasGroup> ().currentModelingObject.handles.DisableHandles ();
+				Selection.Instance.enableFaceSelection (true);
                 break;
             case (menuType.MainMenu):
                 transform.parent.GetComponent<UiCanvasGroup>().currentModelingObject.handles.DisableHandles();

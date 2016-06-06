@@ -4,26 +4,32 @@ using System.Collections;
 public class Vertex : MonoBehaviour {
 
     private VertexBundle parentVertexBundle;
-    private ModelingObject parentObject;
+    public ModelingObject parentObject;
 	public Vector3 normal;
     public bool moving;
 	public GameObject normalPrefab;
+	public bool initialized = false;
 
 	// Use this for initialization
 	void Start () {
         moving = false;
-        parentVertexBundle = transform.parent.GetComponent<VertexBundle>();
-        parentObject = transform.parent.parent.parent.parent.GetComponent<ModelingObject>();
     }
+
+	public void Initialize() {
+
+		parentVertexBundle = transform.parent.GetComponent<VertexBundle>();
+		parentObject = transform.parent.parent.parent.parent.GetComponent<ModelingObject>();
+		initialized = true;
+
+	}
 	
 	// Update is called once per frame
 	void Update () {
-	    if (parentVertexBundle.coordinates != this.transform.localPosition)
+	    if (initialized && parentVertexBundle.coordinates != this.transform.localPosition)
         {
             if (moving)
             {
                 UpdateVertexBundle();
-                Debug.Log("Update mesh");
             } else
             {
                 UpdatePositionFromVertexBundle();
